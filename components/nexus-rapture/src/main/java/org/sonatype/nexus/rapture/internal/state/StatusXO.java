@@ -27,6 +27,8 @@ public class StatusXO
 
   private String buildTimestamp;
 
+  private String codename;
+
   public StatusXO() {
   }
 
@@ -69,11 +71,20 @@ public class StatusXO
     this.buildTimestamp = buildTimestamp;
   }
 
+  public String getCodename() {
+    return codename;
+  }
+
+  public void setCodename(String codename) {
+    this.codename = codename;
+  }
+
   @Override
   public String toString() {
     return "StatusXO{" +
         "edition='" + edition + '\'' +
         ", version='" + version + '\'' +
+        ", codename='" + codename + '\'' +
         ", buildRevision='" + buildRevision + '\'' +
         ", buildTimestamp='" + buildTimestamp + '\'' +
         '}';

@@ -34,7 +34,29 @@ const {WELCOME: {
     PEAK_REQUESTS_PER_MINUTE,
     PEAK_REQUESTS_PER_DAY}}} = UIStrings;
 
+/*
+ * These cards read service/rest/internal/ui/usage-metrics. That resource is not part of this
+ * EPL source tree: org.sonatype.nexus.common.analytics.UsageMetrics is an interface here with
+ * no implementation, and the collection and aggregation behind it live in Sonatype's closed
+ * analytics code. The request can therefore only ever 404, leaving a failed-to-load panel on
+ * the Welcome page for administrators, so the section is not rendered.
+ *
+ * Unlike the malware risk-on-disk banner there is no feature flag to switch off, and unlike
+ * outreach there is no bundle name in this tree to test for. Hence the plain guard.
+ */
+const USAGE_METRICS_BACKEND_AVAILABLE = false;
+
 export default function UsageMetrics() {
+  if (!USAGE_METRICS_BACKEND_AVAILABLE) {
+    return null;
+  }
+
+  return <UsageMetricsContent/>;
+}
+
+// Exported for the tests, which cover the rendering of the cards themselves. The default
+// export is what the Welcome page mounts, and the guard above keeps it from rendering.
+export function UsageMetricsContent() {
   const [state, send] = useMachine(UsageMetricsMachine, {devtools: true}),
     {data: {totalComponents, uniqueLogins, peakRequestsPerMin, peakRequestsPerDay}, loadError} = state.context,
     isLoading = state.matches('loading');

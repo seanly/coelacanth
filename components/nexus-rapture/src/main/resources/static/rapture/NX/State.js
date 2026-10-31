@@ -159,9 +159,21 @@ Ext.define('NX.State', {
    */
   getBrandedEditionAndVersion: function() {
     var edition = this.getEdition(),
-        version = this.getVersion();
+        version = this.getVersion(),
+        codename = this.getCodename(),
+        brand = edition + ' ' + version;
 
-    return edition + ' ' + version;
+    return (codename && codename !== 'UNKNOWN') ? brand + ' (' + codename + ')' : brand;
+  },
+
+  /**
+   * Return status.codename, the release codename. 'UNKNOWN' when the build set none.
+   *
+   * @public
+   * @returns {string}
+   */
+  getCodename: function() {
+    return this.getValue('status')['codename'];
   },
 
   /**

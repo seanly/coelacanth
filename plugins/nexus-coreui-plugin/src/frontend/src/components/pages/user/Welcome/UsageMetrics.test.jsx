@@ -15,7 +15,10 @@ import axios from 'axios';
 import {render, screen, waitForElementToBeRemoved, within} from '@testing-library/react';
 import {when} from 'jest-when';
 
-import UsageMetrics from './UsageMetrics';
+// The default export is guarded off in this tree: the usage-metrics REST resource is part of
+// Sonatype's closed analytics code and absent here. These tests cover the card rendering, so
+// they exercise the inner component directly. UsageMetricsNotRendered below covers the guard.
+import UsageMetrics, {UsageMetricsContent} from './UsageMetrics';
 import TestUtils from '@sonatype/nexus-ui-plugin/src/frontend/src/interface/TestUtils';
 import {APIConstants, ExtJS} from '@sonatype/nexus-ui-plugin';
 import {act} from 'react-dom/test-utils';
@@ -71,7 +74,7 @@ describe('Usage Metrics', () => {
         .calledWith('contentUsageEvaluationResult', [])
         .mockReturnValue(usageWithCircuitB);
 
-    render(<UsageMetrics />);
+    render(<UsageMetricsContent />);
     await waitForElementToBeRemoved(selectors.queryLoadingMask());
   }
 
@@ -80,6 +83,13 @@ describe('Usage Metrics', () => {
       I18n: {get: jest.fn()},
     };
   })
+
+  it('renders nothing and makes no request, the backend being absent from this tree', function() {
+    render(<UsageMetrics />);
+
+    expect(screen.queryByRole('heading', {name: 'Usage'})).not.toBeInTheDocument();
+    expect(axios.get).not.toHaveBeenCalledWith(USAGE_METRICS);
+  });
 
   it('renders data correctly', async () => {
     await renderView();
@@ -138,7 +148,7 @@ describe('Usage Metrics', () => {
         .mockReturnValue(true);
 
     await act(async() => {
-      render(<UsageMetrics />);
+      render(<UsageMetricsContent />);
     });
 
     expect(selectors.queryAllCards().length).toBe(0);

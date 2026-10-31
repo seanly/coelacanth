@@ -67,4 +67,43 @@ public class ApplicationVersionSupportTest
   public void testGetVersion_missing() {
     assertThat(underTest.getVersion(), is(ApplicationVersionSupport.UNKNOWN));
   }
+
+  @Test
+  public void testGetCodename() {
+    props.setProperty(ApplicationVersionSupport.CODENAME, "coelacanth");
+    assertThat(underTest.getCodename(), is("coelacanth"));
+  }
+
+  @Test
+  public void testGetCodename_missing() {
+    assertThat(underTest.getCodename(), is(ApplicationVersionSupport.UNKNOWN));
+  }
+
+  @Test
+  public void testGetCodename_blank() {
+    props.setProperty(ApplicationVersionSupport.CODENAME, "  ");
+    assertThat(underTest.getCodename(), is(ApplicationVersionSupport.UNKNOWN));
+  }
+
+  /*
+   * An unfiltered resource must not leak the raw Maven placeholder into the UI.
+   */
+  @Test
+  public void testGetCodename_unresolvedPlaceholder() {
+    props.setProperty(ApplicationVersionSupport.CODENAME, "${nexus.codename}");
+    assertThat(underTest.getCodename(), is(ApplicationVersionSupport.UNKNOWN));
+  }
+
+  @Test
+  public void testGetBrandedEditionAndVersion_withCodename() {
+    props.setProperty(ApplicationVersionSupport.VERSION, "3.76.1-02");
+    props.setProperty(ApplicationVersionSupport.CODENAME, "coelacanth");
+    assertThat(underTest.getBrandedEditionAndVersion(), is("3.76.1-02 (coelacanth)"));
+  }
+
+  @Test
+  public void testGetBrandedEditionAndVersion_withoutCodename() {
+    props.setProperty(ApplicationVersionSupport.VERSION, "3.76.1-02");
+    assertThat(underTest.getBrandedEditionAndVersion(), is("3.76.1-02"));
+  }
 }

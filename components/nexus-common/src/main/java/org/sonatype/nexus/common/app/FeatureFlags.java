@@ -203,7 +203,14 @@ public interface FeatureFlags
 
   String MALWARE_RISK_ON_DISK_ENABLED = "nexus.malware.risk.on.disk.enabled";
 
-  String MALWARE_RISK_ON_DISK_ENABLED_NAMED = "${nexus.malware.risk.on.disk.enabled:-true}";
+  /*
+   * Defaulted to false here, against upstream's true. The banner this drives calls
+   * /service/rest/v1/malicious-risk/risk-on-disk, and that resource is part of Sonatype
+   * Repository Firewall — absent from this EPL tree, so the request can only ever 404 and
+   * leave a failed-to-load alert on the Welcome page. Set the property to true to restore
+   * upstream behaviour.
+   */
+  String MALWARE_RISK_ON_DISK_ENABLED_NAMED = "${nexus.malware.risk.on.disk.enabled:-false}";
 
   String MALWARE_RISK_ON_DISK_NONADMIN_OVERRIDE_ENABLED = "nexus.malware.risk.on.disk.nonadmin.override.enabled";
 

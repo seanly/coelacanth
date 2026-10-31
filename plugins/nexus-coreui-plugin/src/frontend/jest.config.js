@@ -17,6 +17,15 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+// Several suites assert on dates rendered by `new Date(..).toLocaleString()` with no explicit
+// locale, so the expected strings are en-US ("1/1/2020, 1:00:00 AM"). On a host with another
+// default locale those assertions fail on formatting alone — zh-CN renders the same instant as
+// "2020/1/1 01:00:00". Pinning the locale here keeps the suite independent of the host.
+// Timezone needs no pinning: that test data carries no offset, so it parses as local time and
+// formats back to the same wall-clock string in any zone.
+process.env.LANG = 'en_US.UTF-8';
+process.env.LC_ALL = 'en_US.UTF-8';
+
 module.exports = {
   // Fix Memory problems with jest and workers on CircleCI (public) build
   maxWorkers: 2,

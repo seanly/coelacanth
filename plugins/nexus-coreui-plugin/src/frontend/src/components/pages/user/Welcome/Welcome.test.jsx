@@ -39,6 +39,8 @@ const {WELCOME: {
 
 const {USAGE_METRICS} = APIConstants.REST.INTERNAL;
 
+const OUTREACH_BUNDLE = 'com.sonatype.nexus.plugins.nexus-outreach-plugin';
+
 // Creates a selector function that uses getByRole by default but which can be customized per-use to use
 // queryByRole, findByRole, etc instead
 const selectorQuery = (...queryParams) => queryType => screen[`${queryType ?? 'get'}ByRole`].apply(screen, queryParams);
@@ -80,6 +82,7 @@ describe('Welcome', function() {
 
     when(ExtJS.state().getValue).calledWith('browseableformats').mockReturnValue([]);
     when(ExtJS.state().getValue).calledWith('status').mockReturnValue(status);
+    when(ExtJS.state().getValue).calledWith('activeBundles').mockReturnValue([OUTREACH_BUNDLE]);
   });
 
   it('renders a main content area', function() {
@@ -118,6 +121,17 @@ describe('Welcome', function() {
         expect.objectContaining({ action: 'outreach_Outreach', method: 'readStatus' }),
         expect.objectContaining({ action: 'outreach_Outreach', method: 'getProxyDownloadNumbers' })
       ]);
+    });
+
+    it('makes no outreach backend calls when the outreach bundle is not installed', async function() {
+      when(ExtJS.state().getValue).calledWith('activeBundles').mockReturnValue([]);
+      render(<Welcome />);
+
+      await waitForElementToBeRemoved(selectors.loadingStatus);
+
+      expect(axios.post).not.toHaveBeenCalled();
+      expect(selectors.outreachFrame('query')).not.toBeInTheDocument();
+      expect(selectors.errorAlert('query')).not.toBeInTheDocument();
     });
 
     it('renders a loading spinner until the outreach backend calls complete', async function() {
@@ -332,7 +346,12 @@ describe('Welcome', function() {
   });
 
   describe('usage section', function() {
-    it("renders metrics cards when an administrator", async () => {
+    /*
+     * Upstream renders three metrics cards here for an administrator. The usage-metrics REST
+     * resource is part of Sonatype's closed analytics code and absent from this tree, so the
+     * section is guarded off in UsageMetrics.jsx and no cards are rendered for anyone.
+     */
+    it("does not render metrics cards, the backend being absent from this tree", async () => {
       user = {administrator: true};
 
       when(axios.get)
@@ -341,7 +360,8 @@ describe('Welcome', function() {
       render(<Welcome />);
       await waitForElementToBeRemoved(selectors.loadingStatus());
 
-      expect(selectors.queryAllCards().length).toBe(3);
+      expect(selectors.queryAllCards().length).toBe(0);
+      expect(axios.get).not.toHaveBeenCalledWith(USAGE_METRICS);
     });
 
     it("does not render any card when not an administrator", async () => {

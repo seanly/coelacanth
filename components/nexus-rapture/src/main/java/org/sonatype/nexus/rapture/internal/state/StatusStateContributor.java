@@ -57,6 +57,7 @@ public class StatusStateContributor
     StatusXO result = new StatusXO();
     result.setVersion(applicationVersion.getVersion());
     result.setEdition(applicationVersion.getEdition());
+    result.setCodename(applicationVersion.getCodename());
     result.setBuildRevision(applicationVersion.getBuildRevision());
     result.setBuildTimestamp(applicationVersion.getBuildTimestamp());
     return result;

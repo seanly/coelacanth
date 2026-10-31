@@ -256,7 +256,7 @@ public class MyBatisDataStore
     HikariConfig hikariConfig = configureHikari(storeName, attributes);
 
     try {
-      dataSource = new HikariDataSource(hikariConfig);
+      dataSource = openPool(hikariConfig, attributes);
     }catch (Exception exception) {
       if (isH2UnsupportedDatabaseVersion(exception)) {
         dataSource = h2VersionUpgrader.upgradeH2Database(storeName, hikariConfig);
@@ -501,7 +501,7 @@ public class MyBatisDataStore
       // workaround https://github.com/pgjdbc/pgjdbc/issues/265
       properties.put("dataSource.stringtype", "unspecified");
 
-      properties.putIfAbsent("maximumPoolSize", DEFAULT_CONTENT_STORE_MAX_POOL_SIZE);
+      properties.putIfAbsent("maximumPoolSize", Integer.toString(DEFAULT_CONTENT_STORE_MAX_POOL_SIZE));
     }
 
     // Hikari doesn't like blank schemas in its config
@@ -510,6 +510,30 @@ public class MyBatisDataStore
     }
 
     return new HikariConfig(properties);
+  }
+
+  /**
+   * Opens the pool. PostgreSQL's driver is loaded by this bundle, so the context class loader has to see it.
+   */
+  private HikariDataSource openPool(final HikariConfig hikariConfig, final Map<String, String> attributes) {
+    String jdbcUrl = attributes.get(JDBC_URL);
+    if (jdbcUrl == null || !jdbcUrl.startsWith("jdbc:postgresql")) {
+      return new HikariDataSource(hikariConfig);
+    }
+
+    Thread thread = Thread.currentThread();
+    ClassLoader previous = thread.getContextClassLoader();
+    thread.setContextClassLoader(MyBatisDataStore.class.getClassLoader());
+    try {
+      Class.forName("org.postgresql.Driver", true, MyBatisDataStore.class.getClassLoader());
+      return new HikariDataSource(hikariConfig);
+    }
+    catch (ClassNotFoundException e) {
+      throw new IllegalStateException("PostgreSQL JDBC driver is not available", e);
+    }
+    finally {
+      thread.setContextClassLoader(previous);
+    }
   }
 
   /**

@@ -1,0 +1,32 @@
+# The build context feeds two paths (see docker/Dockerfile):
+#   prebuilt - needs only the assembled zip
+#   builder  - needs the source tree
+#
+# So the source is admitted, and what the build regenerates or does not read is excluded.
+# .git stays out: 246M for a revision string. The builder stage takes the SHA as a build arg
+# instead, and docker-bake.hcl fills it from the host.
+
+.git
+.github
+.idea
+*.iml
+
+# Build output. The builder stage regenerates these, and a stale host-built target directory
+# would otherwise be copied in and shadow it. The zip the prebuilt stage reads is re-admitted
+# at the bottom.
+**/target
+**/node_modules
+**/.yarn/cache
+**/.yarn/install-state.gz
+**/.yarn/unplugged
+**/yarn-error.log
+
+# Local scratch
+.DS_Store
+**/*.log
+docker/docker-compose.override.yml
+
+# Re-admit the assembled zip for the prebuilt stage. The **/target rule above excludes it, and
+# a later pattern wins, so this line must stay last. Keep the version in step with
+# nexus.version in the root pom.
+!assemblies/nexus-base-template/target/nexus-base-template-3.76.1-02.zip

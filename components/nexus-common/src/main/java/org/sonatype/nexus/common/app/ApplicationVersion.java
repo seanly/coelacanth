@@ -32,6 +32,14 @@ public interface ApplicationVersion
   String getEdition();
 
   /**
+   * Returns the release codename, for display only.
+   *
+   * Unlike {@link #getVersion()} this is not part of any build coordinate: it is absent from OSGi
+   * bundle versions, the outbound User-Agent and the Swagger API version.
+   */
+  String getCodename();
+
+  /**
    * Returns the edition and version suitable for branded display.
    */
   String getBrandedEditionAndVersion();

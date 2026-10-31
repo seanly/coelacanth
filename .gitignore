@@ -14,6 +14,29 @@ target/
 *.iws
 .idea/
 
+# Eclipse build output: module dirs copied under bin/ (bin/pom.xml, bin/target/, ...).
+# Scoped to module roots so the tracked Karaf launcher scripts in
+# assemblies/nexus-base-overlay/src/main/resources/overlay/bin/ are not matched.
+/components/*/bin/
+/plugins/*/bin/
+/testsuite/*/bin/
+/assemblies/*/bin/
+/buildsupport/*/bin/
+.factorypath
+
+# Node / Yarn Berry
+node_modules/
+.yarn/cache/
+.yarn/install-state.gz
+.yarn/unplugged/
+.yarn/build-state.yml
+.pnp.*
+npm-debug.log*
+yarn-error.log
+
+# Agent tooling
+.claude/
+
 # Other
 .DS_Store
 .clover

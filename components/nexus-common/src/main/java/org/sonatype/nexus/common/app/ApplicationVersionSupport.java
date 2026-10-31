@@ -43,6 +43,9 @@ public abstract class ApplicationVersionSupport
   @VisibleForTesting
   static final String NEXUS2_VERSION = "nexus2.version";
 
+  @VisibleForTesting
+  static final String CODENAME = "codename";
+
   /**
    * Resource name of properties-file which contains version information.
    */
@@ -89,11 +92,26 @@ public abstract class ApplicationVersionSupport
     return property(VERSION);
   }
 
+  /**
+   * Returns the codename, or {@link #UNKNOWN} when the build did not set one. An unresolved Maven
+   * property is also treated as unset, so an unfiltered resource does not leak a placeholder.
+   */
+  @Override
+  public String getCodename() {
+    String codename = property(CODENAME).trim();
+    if (codename.isEmpty() || codename.startsWith("${")) {
+      return UNKNOWN;
+    }
+    return codename;
+  }
+
   @Override
   public String getBrandedEditionAndVersion() {
     String edition = getEdition();
     String version = getVersion();
-    return ("OSS".equals(edition) ? edition + " " : "") + version;
+    String codename = getCodename();
+    String brand = ("OSS".equals(edition) ? edition + " " : "") + version;
+    return UNKNOWN.equals(codename) ? brand : brand + " (" + codename + ")";
   }
 
   @Override

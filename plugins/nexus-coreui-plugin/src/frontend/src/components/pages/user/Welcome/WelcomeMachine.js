@@ -24,6 +24,9 @@ const action = APIConstants.EXT.OUTREACH.ACTION,
     outreachStatusMethod = APIConstants.EXT.OUTREACH.METHODS.READ_STATUS,
     proxyDownloadNumbersMethod = APIConstants.EXT.OUTREACH.METHODS.GET_PROXY_DOWNLOAD_NUMBERS;
 
+// the outreach backend lives in a separate bundle that is not always installed
+const OUTREACH_BUNDLE = 'com.sonatype.nexus.plugins.nexus-outreach-plugin';
+
 const welcomeMachine = createMachine({
   id: 'WelcomeMachine',
   predictableActionArguments: true,
@@ -65,6 +68,15 @@ const welcomeMachine = createMachine({
   },
   services: {
     fetch: async () => {
+      // without that bundle there is no 'outreach_Outreach' action to call, so skip the requests
+      const activeBundles = ExtJS.state().getValue('activeBundles');
+      if (!activeBundles?.includes(OUTREACH_BUNDLE)) {
+        return {
+          showOutreachIframe: false,
+          proxyDownloadNumberParams: null,
+        };
+      }
+
       const user = ExtJS.state().getUser(),
           edition = ExtJS.state().getValue('status')?.edition,
           isAdmin = user?.administrator,

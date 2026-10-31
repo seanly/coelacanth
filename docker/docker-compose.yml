@@ -1,0 +1,46 @@
+name: coelacanth
+
+services:
+  postgres:
+    image: docker.syscube.dev/postgres:16
+    environment:
+      POSTGRES_USER: nexus
+      POSTGRES_PASSWORD: nexus
+      POSTGRES_DB: nexus
+    command: ["postgres", "-c", "max_connections=200"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexus -d nexus"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  nexus:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        # Compiles from source in-container, so `docker compose up -d --build` is
+        # self-contained and needs no JDK or Maven on the host. Cold cache takes a while; the
+        # Maven repository is kept in a BuildKit cache mount, so a rebuild skips the downloads.
+        #
+        # To use a zip the host already built instead (faster when you are iterating with
+        # ./mvnw anyway):  SOURCE_STAGE=prebuilt docker compose up -d --build
+        SOURCE_STAGE: ${SOURCE_STAGE:-builder}
+        # Without these the in-container build records build.revision as null: .git is kept out
+        # of the build context, so buildnumber-maven-plugin cannot read it.
+        BUILD_REVISION: ${BUILD_REVISION:-unknown}
+        BUILD_BRANCH: ${BUILD_BRANCH:-unknown}
+    image: seanly/appset:nexus3-3.76.1-02-java17-1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      JAVA_MIN_MEM: 512m
+      JAVA_MAX_MEM: 1024m
+      DIRECT_MAX_MEM: 512m
+      INSTALL4J_ADD_VM_PARAMS: -Xms512m -Xmx1024m -XX:MaxDirectMemorySize=512m -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+      NEXUS_DATASTORE_NEXUS_JDBCURL: jdbc:postgresql://postgres:5432/nexus
+      NEXUS_DATASTORE_NEXUS_USERNAME: nexus
+      NEXUS_DATASTORE_NEXUS_PASSWORD: nexus
