@@ -2,6 +2,19 @@ variable "VERSION" {
   default = "3.76.1-02"
 }
 
+# Distribution name. This is Nexus plus the coelacanth additions (external PostgreSQL, LDAP,
+# user tokens, analytics declined by default), so the tag names the fork rather than plain
+# nexus3 and nobody mistakes it for an upstream build.
+#
+# VERSION stays the upstream Nexus version, because that is what has to match the data
+# directory and the bundled plugin versions. The fork's own release label lives on the branch
+# and in the image's codename label.
+#
+# docker-compose.yml hard-codes the resulting tag and has to be kept in step with this.
+variable "DIST_NAME" {
+  default = "nexus3-coelacanth"
+}
+
 variable "JAVA_VERSION" {
   default = "java17"
 }
@@ -38,7 +51,7 @@ group "default" {
 target "nexus3" {
   labels = {
     "cloud.opsbox.author"       = "seanly"
-    "cloud.opsbox.image.name"   = "nexus3"
+    "cloud.opsbox.image.name"   = "${DIST_NAME}"
     "cloud.opsbox.image.version" = "${VERSION}"
     "cloud.opsbox.image.java-version" = "${JAVA_VERSION}"
     "cloud.opsbox.image.fixid"  = "${FIXID}"
@@ -53,7 +66,7 @@ target "nexus3" {
     BUILD_REVISION = "${BUILD_REVISION}"
     BUILD_BRANCH   = "${BUILD_BRANCH}"
   }
-  tags = ["seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}-${FIXID}"]
+  tags = ["seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}-${FIXID}"]
   output = ["type=docker"]
 }
 
@@ -71,7 +84,7 @@ target "nexus3-prebuilt" {
   labels = {
     "cloud.opsbox.image.source-stage" = "prebuilt"
   }
-  tags = ["seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}-${FIXID}-prebuilt"]
+  tags = ["seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}-${FIXID}-prebuilt"]
 }
 
 variable "ACR_REGISTRY" {
@@ -85,7 +98,7 @@ group "acr" {
 target "nexus3-amd64" {
   labels = {
     "cloud.opsbox.author"       = "seanly"
-    "cloud.opsbox.image.name"   = "nexus3"
+    "cloud.opsbox.image.name"   = "${DIST_NAME}"
     "cloud.opsbox.image.version" = "${VERSION}"
     "cloud.opsbox.image.java-version" = "${JAVA_VERSION}"
     "cloud.opsbox.image.fixid"  = "${FIXID}"
@@ -102,10 +115,10 @@ target "nexus3-amd64" {
   }
   platforms = ["linux/amd64"]
   tags = [
-    "${ACR_REGISTRY}/seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}-${FIXID}",
-    "${ACR_REGISTRY}/seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}",
-    "${ACR_REGISTRY}/seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}-${FIXID}-amd64",
-    "${ACR_REGISTRY}/seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}-amd64"
+    "${ACR_REGISTRY}/seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}-${FIXID}",
+    "${ACR_REGISTRY}/seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}",
+    "${ACR_REGISTRY}/seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}-${FIXID}-amd64",
+    "${ACR_REGISTRY}/seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}-amd64"
   ]
   output = ["type=docker"]
 }
@@ -113,7 +126,7 @@ target "nexus3-amd64" {
 target "nexus3-arm64" {
   labels = {
     "cloud.opsbox.author"       = "seanly"
-    "cloud.opsbox.image.name"   = "nexus3"
+    "cloud.opsbox.image.name"   = "${DIST_NAME}"
     "cloud.opsbox.image.version" = "${VERSION}"
     "cloud.opsbox.image.java-version" = "${JAVA_VERSION}"
     "cloud.opsbox.image.fixid"  = "${FIXID}"
@@ -130,8 +143,8 @@ target "nexus3-arm64" {
   }
   platforms = ["linux/arm64"]
   tags = [
-    "${ACR_REGISTRY}/seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}-${FIXID}-arm64",
-    "${ACR_REGISTRY}/seanly/appset:nexus3-${VERSION}-${JAVA_VERSION}-arm64"
+    "${ACR_REGISTRY}/seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}-${FIXID}-arm64",
+    "${ACR_REGISTRY}/seanly/appset:${DIST_NAME}-${VERSION}-${JAVA_VERSION}-arm64"
   ]
   output = ["type=docker"]
 }

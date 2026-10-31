@@ -1,0 +1,186 @@
+<!--
+
+    Sonatype Nexus (TM) Open Source Version
+    Copyright (c) 2008-present Sonatype, Inc.
+    All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
+
+    This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
+    which accompanies this distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
+
+    Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are trademarks
+    of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
+    Eclipse Foundation. All other trademarks are the property of their respective owners.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.sonatype.nexus.plugins</groupId>
+    <artifactId>nexus-plugins</artifactId>
+    <version>3.76.1-02</version>
+  </parent>
+
+  <artifactId>coelacanth-usertoken-plugin</artifactId>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <packaging>bundle</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-plugin-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-security</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-capability</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-formfields</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-rapture</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-siesta</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-rest</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-common</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-validation</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-scheduling</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-healthchecks</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-web</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.goodies</groupId>
+      <artifactId>goodies-common</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!--
+      javax.annotation-api is declared explicitly, ahead of anything that drags in
+      jboss-annotations-api_1.3_spec. Both export javax.annotation, at 1.2 and 2.0.1 respectively, and bnd takes the
+      version from whichever appears first on the compile classpath. Letting the jboss spec win produced
+      Import-Package: javax.annotation;version="2.0", which no bundle in the runtime satisfies, and the plugin failed
+      to resolve at startup with "missing requirement ... osgi.wiring.package=javax.annotation version>=2.0.0".
+    -->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-test-common</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-testsupport</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <!--
+              Only Import-Package is overridden here, and it repeats the parent's rules verbatim before adding one
+              clause. Maven replaces the whole <instructions> block rather than merging it, so dropping the parent's
+              content would silently lose Feature-Flagged, Include-Resource, Private-Package and _noclassforname.
+
+              The added clause pins javax.annotation to 1.2. Two bundles on the compile classpath export that
+              package, javax.annotation-api at 1.2 and jboss-annotations-api_1.3_spec at 2.0.1, and bnd inferred
+              2.0, which nothing in the runtime provides: the bundle then failed to resolve at startup with
+              "missing requirement ... osgi.wiring.package=javax.annotation version>=2.0.0". Only javax.annotation
+              .Nullable is used, which is present in both, so the lower range is the correct one.
+            -->
+            <Import-Package>
+              javax.annotation;version="[1.2,2)",
+              $(if;$(classes;EXTENDS;*.FacetSupport);org.sonatype.nexus.repository.config),
+              $(if;$(classes;EXTENDS;*.(Blob|Data)StoreSupport);org.sonatype.nexus.transaction),
+              $(if;$(classes;EXTENDS;*.ContentFacetSupport);org.sonatype.nexus.repository.content,org.sonatype.nexus.transaction),
+              $(if;$(classes;IMPLEMENTS;*.ContentRepositoryDAO);org.sonatype.nexus.common.entity),
+              $(if;$(classes;IMPLEMENTS;*.AssetBlobDAO);org.sonatype.nexus.blobstore.api),
+              *
+            </Import-Package>
+            <_consumer-policy>$(version;==)</_consumer-policy>
+            <Include-Resource>
+              /=${project.build.outputDirectory},{maven-resources}
+            </Include-Resource>
+            <Private-Package/>
+            <Feature-Flagged>
+              $(classes;ANNOTATED;org.sonatype.nexus.common.app.FeatureFlag)
+            </Feature-Flagged>
+            <_noclassforname>true</_noclassforname>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

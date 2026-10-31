@@ -1,0 +1,38 @@
+#*
+ * Sonatype Nexus (TM) Open Source Version
+ * Copyright (c) 2008-present Sonatype, Inc.
+ * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
+ *
+ * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
+ * which accompanies this distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
+ *
+ * Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are trademarks
+ * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
+ * Eclipse Foundation. All other trademarks are the property of their respective owners.
+*#
+<p>
+  Holds the answer to the usage-metrics question. It is created disabled on first boot, which means declined.
+</p>
+
+<p>
+  <strong>What it affects.</strong> Two things read this capability:
+</p>
+
+<ul>
+  <li>The consent banner in the footer appears only while no capability of this type exists. Because one is created
+    at startup, the banner never appears.</li>
+  <li>Maven proxy repositories append a marker to their outbound <code>User-Agent</code> saying which answer was
+    given: <code>pad</code> when declined, <code>pae</code> when enabled, <code>pau</code> when unanswered. Upstream
+    repositories such as Maven Central see this marker on every request.</li>
+</ul>
+
+<p>
+  <strong>What it does not do.</strong> This edition ships no code that collects or transmits usage metrics. Enabling
+  the capability records consent and changes the User-Agent marker; it starts no reporting, because there is nothing
+  here to report with.
+</p>
+
+<p>
+  <strong>Changing the answer.</strong> Enable this capability to opt in, disable it to decline. Deleting it returns
+  the instance to the unanswered state, which brings the banner back on the next page load.
+</p>

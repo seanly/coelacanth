@@ -1,0 +1,47 @@
+#*
+ * Sonatype Nexus (TM) Open Source Version
+ * Copyright (c) 2008-present Sonatype, Inc.
+ * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
+ *
+ * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
+ * which accompanies this distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
+ *
+ * Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are trademarks
+ * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
+ * Eclipse Foundation. All other trademarks are the property of their respective owners.
+*#
+<p>
+  Authenticates users against an LDAP directory and maps directory groups onto Nexus roles.
+</p>
+
+<p>
+  <strong>Bind mode.</strong> Leave <em>User DN Pattern</em> blank to use search bind: the plugin binds as the
+  manager account, locates the user with the search filter, then binds as that user to verify the password. Set a
+  pattern instead to build the user DN directly, which only works where the directory permits anonymous bind.
+</p>
+
+<p>
+  <strong>Group strategy.</strong> Directories expose membership incompatibly, so pick the one that matches yours:
+</p>
+
+<ul>
+  <li><strong>STATIC</strong> &mdash; the group entry lists its members. Costs one subtree search per lookup, so keep
+    the group search base narrow.</li>
+  <li><strong>DYNAMIC</strong> &mdash; the user entry lists its groups, normally in <code>memberOf</code>. Cheapest
+    option. In OpenLDAP this attribute comes from an overlay that is off by default.</li>
+  <li><strong>HIERARCHY</strong> &mdash; groups are the <code>ou</code> components of the user DN. No directory
+    lookup, but moving a user between organizational units changes their groups.</li>
+  <li><strong>NONE</strong> &mdash; authenticate only; roles are assigned to users individually in Nexus.</li>
+</ul>
+
+<p>
+  <strong>Granting access.</strong> Directory groups arrive as role identifiers with source <code>LDAP</code>. Map
+  them to Nexus privileges by creating roles whose ids match the group names, or by granting roles to individual
+  users from the user administration screen.
+</p>
+
+<p>
+  <strong>Caching.</strong> Credentials are verified against the directory on every authentication and are never
+  cached, so a password change or lockout takes effect immediately. Group lookups are cached, since every artifact
+  request triggers one.
+</p>

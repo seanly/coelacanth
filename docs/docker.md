@@ -20,6 +20,26 @@ BUILD_BRANCH="$(git branch --show-current)" \
 
 `BUILD_REVISION` 不传也能构建，只是镜像里的 `build.revision` 会记成 `unknown` —— `.git` 不进构建上下文，buildnumber-maven-plugin 读不到。
 
+## 镜像命名
+
+tag 的构成是 `<DIST_NAME>-<VERSION>-<JAVA_VERSION>-<FIXID>`，默认产出：
+
+```
+seanly/appset:nexus3-coelacanth-3.76.1-02-java17-1
+```
+
+`DIST_NAME` 是 `nexus3-coelacanth` 而不是 `nexus3`，因为这个镜像带了本仓库的增补（外部 PostgreSQL、LDAP realm、user token、默认拒绝遥测），名字里点明是这个分支的构建，不会被当成上游镜像。
+
+`VERSION` 保持上游的 Nexus 版本号（`3.76.1-02`）。它要和数据目录格式、随镜像打进去的插件版本对得上，所以这里不放分支自己的版本号 —— 后者在分支名和镜像的 `codename` label 上。
+
+**改名字要动两个文件。** `docker/docker-bake.hcl` 里用的是 `DIST_NAME` 变量（4 个 target 共 8 个 tag 都引用它），但 `docker/docker-compose.yml` 的 `image:` 只能写死字面量，compose 读不到 bake 的变量。两边不一致的话，compose 构建完会给镜像打上它自己那个 tag，跟 bake 产出的不是同一个。
+
+单次覆盖不用改文件：
+
+```bash
+DIST_NAME=nexus3-test docker buildx bake nexus3
+```
+
 ## 用宿主机已构建的 zip
 
 ```bash
@@ -67,9 +87,20 @@ builder stage 的处理办法是：先用 `package.json` 里 `packageManager` �
 docker buildx bake acr          # linux/amd64 + linux/arm64，推到 ACR
 ```
 
-`acr` 组里的两个 target 默认也是 `prebuilt`。要让它们走容器内构建，加 `SOURCE_STAGE=builder`：
+`acr` 组里的两个 target 跟 `nexus3` 一样默认走 `builder`，即在容器内从源码编译。推之前记得把 revision 传进去：
 
 ```bash
-SOURCE_STAGE=builder BUILD_REVISION="$(git rev-parse HEAD)" \
+BUILD_REVISION="$(git rev-parse HEAD)" \
+BUILD_BRANCH="$(git branch --show-current)" \
   docker buildx bake acr
 ```
+
+想用宿主机已经构建好的 zip，显式切过去：
+
+```bash
+SOURCE_STAGE=prebuilt docker buildx bake acr
+```
+
+两个 target 的 tag 不重叠：`nexus3-arm64` 只打带 `-arm64` 后缀的两个，而不带架构后缀的 `...-java17-1` 和 `...-java17` 只挂在 `nexus3-amd64` 上，所以 amd64 实际上就是这两个 tag 指向的默认架构。
+
+注意这个组是分别构建两个单平台镜像，不产出 manifest list —— 它们都是 `output = ["type=docker"]`，各自装进本地 docker。要真正的多架构 manifest 需要改成 `type=registry` 并把两个平台放进同一个 target 的 `platforms`。

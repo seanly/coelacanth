@@ -43,6 +43,9 @@
     <module>nexus-onboarding-plugin</module>
     <module>nexus-default-role-plugin</module>
     <module>nexus-example-content</module>
+    <module>coelacanth-ldap-plugin</module>
+    <module>coelacanth-usertoken-plugin</module>
+    <module>coelacanth-analytics-plugin</module>
   </modules>
 
   <dependencyManagement>
@@ -271,6 +274,54 @@
       <dependency>
         <groupId>org.sonatype.nexus.plugins</groupId>
         <artifactId>nexus-default-role-plugin</artifactId>
+        <version>3.76.1-02</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+      </dependency>
+
+      <!-- coelacanth ldap plugin -->
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>coelacanth-ldap-plugin</artifactId>
+        <version>3.76.1-02</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>coelacanth-ldap-plugin</artifactId>
+        <version>3.76.1-02</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+      </dependency>
+
+      <!-- coelacanth usertoken plugin -->
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>coelacanth-usertoken-plugin</artifactId>
+        <version>3.76.1-02</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>coelacanth-usertoken-plugin</artifactId>
+        <version>3.76.1-02</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+      </dependency>
+
+      <!-- coelacanth analytics plugin -->
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>coelacanth-analytics-plugin</artifactId>
+        <version>3.76.1-02</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>coelacanth-analytics-plugin</artifactId>
         <version>3.76.1-02</version>
         <classifier>features</classifier>
         <type>xml</type>

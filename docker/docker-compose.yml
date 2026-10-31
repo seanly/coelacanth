@@ -30,7 +30,10 @@ services:
         # of the build context, so buildnumber-maven-plugin cannot read it.
         BUILD_REVISION: ${BUILD_REVISION:-unknown}
         BUILD_BRANCH: ${BUILD_BRANCH:-unknown}
-    image: seanly/appset:nexus3-3.76.1-02-java17-1
+    # Must match the tag docker-bake.hcl produces: ${DIST_NAME}-${VERSION}-${JAVA_VERSION}-${FIXID}.
+    # Compose cannot read those variables, so the tag is spelled out and the two files have to
+    # be changed together.
+    image: seanly/appset:nexus3-coelacanth-3.76.1-02-java17-1
     depends_on:
       postgres:
         condition: service_healthy

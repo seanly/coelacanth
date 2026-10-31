@@ -479,14 +479,8 @@ window.plugins.push({
       view: UserTokens,
       iconCls: 'x-fa fa-key',
       visibility: {
+        bundle: 'org.sonatype.nexus.plugins.coelacanth-usertoken-plugin',
         permissions: [Permissions.USER_TOKENS_SETTINGS.READ],
-        editions: ['PRO'],
-        licenseValid: [
-          {
-            key: 'usertoken',
-            defaultValue: false
-          }
-        ],
       },
     },
     {
@@ -528,15 +522,14 @@ window.plugins.push({
       view: UserToken,
       iconCls: 'x-fa fa-key',
       visibility: {
-        bundle: 'com.sonatype.nexus.plugins.nexus-usertoken-plugin',
+        bundle: 'org.sonatype.nexus.plugins.coelacanth-usertoken-plugin',
         statesEnabled: [
           {
             key: 'usertoken',
             defaultValue: {enabled: false}
           }
         ],
-        permissions: ['nexus:usertoken-current:read'],
-        editions: ['PRO']
+        permissions: ['nexus:usertoken-current:read']
       }
     },
     {

@@ -1,0 +1,40 @@
+#*
+ * Sonatype Nexus (TM) Open Source Version
+ * Copyright (c) 2008-present Sonatype, Inc.
+ * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
+ *
+ * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
+ * which accompanies this distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
+ *
+ * Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are trademarks
+ * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
+ * Eclipse Foundation. All other trademarks are the property of their respective owners.
+*#
+<p>
+  Gives each user a revocable credential to put in build tooling instead of their password.
+</p>
+
+<p>
+  <strong>How it is used.</strong> The token is an HTTP basic auth pair: the user name is the owner's Nexus user id
+  and the password is a generated secret. Any client that speaks basic auth works without modification, which covers
+  Maven, Docker, npm and curl.
+</p>
+
+<p>
+  <strong>Why it matters with an external directory.</strong> When accounts come from LDAP or an identity provider,
+  a password in <code>settings.xml</code> is the user's directory password, usable against every other system that
+  trusts that directory. A token is useless anywhere but this server, so a leaked settings file no longer widens
+  beyond it.
+</p>
+
+<p>
+  <strong>Revocation.</strong> A token can be reset by its owner at any time, which invalidates the previous value
+  immediately. Tokens also stop working as soon as their owner's account is disabled or removed, because the owner's
+  status is rechecked on every authentication.
+</p>
+
+<p>
+  <strong>Requiring tokens.</strong> With <em>Require User Tokens for Repository Access</em> set, repository traffic
+  authenticated with a plain password is refused. Leave it off until tokens have been distributed, or existing
+  builds will begin failing as soon as the capability is saved.
+</p>
